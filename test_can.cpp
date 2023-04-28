@@ -5,9 +5,9 @@
 #include "pico/stdlib.h"
 #include <stdint.h>
 #include <stdio.h>
-// extern "C" {
+extern "C" {
 #include "can2040.h"
-// }
+}
 #include "RP2040.h"
 
 #include <iostream>
