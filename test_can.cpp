@@ -1,24 +1,26 @@
 // source: https://gitea.predevolution-technologies.de/anme/CAN2040_Test
 
-#include <stdio.h>
-#include <stdint.h>
-#include "pico/stdlib.h"
-#include "pico/binary_info.h"
 #include "hardware/irq.h"
+#include "pico/binary_info.h"
+#include "pico/stdlib.h"
+#include <stdint.h>
+#include <stdio.h>
+// extern "C" {
 #include "can2040.h"
+// }
 #include "RP2040.h"
+
+#include <iostream>
 
 static struct can2040 cbus;
 
-static void can2040_cb(struct can2040 *cd, uint32_t notify, struct can2040_msg *msg)
+static void can2040_cb(struct can2040 *cd, uint32_t notify,
+                       struct can2040_msg *msg)
 {
     // Add message processing code here...
 }
 
-static void PIOx_IRQHandler(void)
-{
-    can2040_pio_irq_handler(&cbus);
-}
+static void PIOx_IRQHandler(void) { can2040_pio_irq_handler(&cbus); }
 
 void canbus_setup(void)
 {
@@ -52,7 +54,8 @@ int main(void)
 
     while (1)
     {
-        printf("bla\n");
+        // printf("bla\n");
+        std::cout << "blah\n";
         gpio_put(LED_PIN, ledState);
         if (ledState == 0)
         {
@@ -65,3 +68,10 @@ int main(void)
         sleep_ms(1000);
     }
 }
+
+// #include <iostream>
+
+// int main()
+// {
+//     std::cout<<"hi"<<"\n";
+// }
