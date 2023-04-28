@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(ENV{PICO_SDK_PATH} /Users/nathankau/pico/pico-sdk)
+# set(ENV{PICO_SDK_PATH} /Users/nathankau/pico/pico-sdk)
 # set(ENV{PICO_SDK_FETCH_FROM_GIT} 1)
 
 include(pico_sdk_import.cmake)
