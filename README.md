@@ -3,7 +3,9 @@
 * Download Pico SDK and set PICO_SDK_PATH environment variable (or uncomment the line in the CMakeLists.txt so that it's automatically downloaded)
 
 # Problem
-I can't build!
+I can't build! 
+
+Edit: Resolved by doing `extern "C" {#include "can2040.h"}`. I hate you GCC. I hate you C++. I hate you C. I want 3 hours of my life back.
 
 Steps:
 1. `mkdir build; cd build`

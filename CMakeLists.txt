@@ -16,12 +16,13 @@ pico_sdk_init()
 add_library(can2040 can2040.c can2040.h)
 target_link_libraries(can2040 PUBLIC pico_stdlib hardware_pio cmsis_core)
 
-add_executable(test_can test_can.cpp)
+add_executable(test_can test_can.cc)
 target_link_libraries(test_can pico_stdlib can2040)
-target_include_directories(test_can PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}
-    ${CMAKE_CURRENT_LIST_DIR}/.. # for our common lwipopts or any other standard includes, if required
-)
+
+# target_include_directories(test_can PRIVATE
+#     ${CMAKE_CURRENT_LIST_DIR}
+#     ${CMAKE_CURRENT_LIST_DIR}/.. # for our common lwipopts or any other standard includes, if required
+# )
 
 pico_add_extra_outputs(test_can)
 pico_enable_stdio_usb(test_can 1)
