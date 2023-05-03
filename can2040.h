@@ -1,5 +1,16 @@
+// Software CANbus implementation for rp2040
+//
+// Copyright (C) 2022  Kevin O'Connor <kevin@koconnor.net>
+//
+// This file may be distributed under the terms of the GNU GPLv3 license.
+// Modified by Nathan Kau 2023
+
 #ifndef _CAN2040_H
 #define _CAN2040_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>  // uint32_t
 
@@ -73,5 +84,9 @@ struct can2040 {
   uint32_t tx_pull_pos, tx_push_pos;
   struct can2040_transmit tx_queue[4];
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // can2040.h
