@@ -19,11 +19,18 @@ target_link_libraries(can2040 PUBLIC pico_stdlib hardware_pio cmsis_core)
 add_executable(test_can test_can.cc)
 target_link_libraries(test_can pico_stdlib can2040)
 
+pico_add_extra_outputs(test_can)
+pico_enable_stdio_usb(test_can 1)
+pico_enable_stdio_uart(test_can 0)
+
+add_executable(dual_can_test dual_can_test.cc)
+target_link_libraries(dual_can_test pico_stdlib can2040)
+
+pico_add_extra_outputs(dual_can_test)
+pico_enable_stdio_usb(dual_can_test 1)
+pico_enable_stdio_uart(dual_can_test 0)
+
 # target_include_directories(test_can PRIVATE
 #     ${CMAKE_CURRENT_LIST_DIR}
 #     ${CMAKE_CURRENT_LIST_DIR}/.. # for our common lwipopts or any other standard includes, if required
 # )
-
-pico_add_extra_outputs(test_can)
-pico_enable_stdio_usb(test_can 1)
-pico_enable_stdio_uart(test_can 0)
