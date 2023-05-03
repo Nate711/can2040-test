@@ -12,11 +12,20 @@
 #include "pico/stdlib.h"
 #include "pico/time.h"
 
+constexpr uint32_t kSysClock = 125'000'000;
+constexpr uint32_t kBitRate = 1'000'000;
+constexpr uint32_t kGPIORX = 0, kGPIOTX = 1;
+constexpr uint32_t kPIONum = 0;
+
+constexpr uint64_t kToggleLEDTime = 500 * 1000;
+constexpr uint64_t kSendMessageTime = 1 * 1000;
+constexpr uint32_t kSleepUS = 1;
+
 static struct can2040 cbus;
 
 static struct can2040_msg latest_msg = {};
-static uint32_t latest_notify = 0;
-static bool new_message = false;
+static volatile uint32_t latest_notify = 0;
+static volatile bool new_message = false;
 
 static void can2040_cb(struct can2040 *cd, uint32_t notify,
                        struct can2040_msg *msg) {
@@ -28,12 +37,8 @@ static void can2040_cb(struct can2040 *cd, uint32_t notify,
 static void PIOx_IRQHandler(void) { can2040_pio_irq_handler(&cbus); }
 
 void canbus_setup(void) {
-  uint32_t pio_num = 0;
-  uint32_t sys_clock = 125000000, bitrate = 125000;
-  uint32_t gpio_rx = 0, gpio_tx = 1;
-
   // Setup canbus
-  can2040_setup(&cbus, pio_num);
+  can2040_setup(&cbus, kPIONum);
   can2040_callback_config(&cbus, can2040_cb);
 
   // Enable irqs
@@ -42,7 +47,7 @@ void canbus_setup(void) {
   NVIC_EnableIRQ(PIO0_IRQ_0_IRQn);
 
   // Start canbus
-  can2040_start(&cbus, sys_clock, bitrate, gpio_rx, gpio_tx);
+  can2040_start(&cbus, kSysClock, kBitRate, kGPIORX, kGPIOTX);
 }
 
 int main(void) {
@@ -56,9 +61,6 @@ int main(void) {
 
   int count = 0;
 
-  constexpr uint64_t kToggleLEDTime = 500 * 1000;
-  constexpr uint64_t kSendMessageTime = 4 * 1000;
-  constexpr uint32_t kSleepUS = 1;
   uint64_t last_led_toggle = time_us_64();
   uint64_t last_msg_sent = time_us_64();
   while (1) {
@@ -77,6 +79,7 @@ int main(void) {
 
     if (time_us_64() - last_msg_sent > kSendMessageTime) {
       last_msg_sent = time_us_64();
+      //   std::cout << "Last msg sent: " << last_msg_sent << "\n";
       struct can2040_msg msg = {};
       msg.id = 100;
       msg.dlc = 8;
@@ -91,11 +94,13 @@ int main(void) {
     if (new_message) {
       new_message = false;
       if (latest_notify == CAN2040_NOTIFY_RX) {
-        printf("got can message!\n");
+        std::cout << ("got can message!\n");
       } else if (latest_notify == CAN2040_NOTIFY_TX) {
-        printf("sent can message!\n");
+        std::cout << ("sent can message!\n");
       } else if (latest_notify == CAN2040_NOTIFY_ERROR) {
-        printf("can error!\n");
+        std::cout << ("can error!\n");
+      } else {
+        std::cout << ("INVALID NOTIFY\n");
       }
     }
     sleep_us(kSleepUS);
