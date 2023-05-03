@@ -3,6 +3,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include <iostream>
 
 #include "RP2040.h"
@@ -13,7 +16,7 @@
 #include "pico/time.h"
 
 constexpr uint32_t kSysClock = 125'000'000;
-constexpr uint32_t kBitRate = 500'000;
+constexpr uint32_t kBitRate = 1'000'000;
 
 constexpr uint32_t kGPIORXA = 0, kGPIOTXA = 1;
 constexpr uint32_t kGPIORXB = 14, kGPIOTXB = 15;
@@ -22,7 +25,7 @@ constexpr uint32_t kPIONumA = 0;
 constexpr uint32_t kPIONumB = 1;
 
 constexpr uint64_t kToggleLEDTime = 500 * 1000;
-constexpr uint64_t kSendMessageTime = 10 * 1000;
+constexpr uint64_t kSendMessageTime = 100 * 1000;
 constexpr uint32_t kSleepUS = 1;
 
 static struct can2040 cbus_a;
@@ -118,32 +121,33 @@ int main(void) {
 
     if (new_message_a) {
       new_message_a = false;
-      //   if (latest_notify_a == CAN2040_NOTIFY_RX) {
-      //     printf("Got CAN message on A!\n");
-      //   } else if (latest_notify_a == CAN2040_NOTIFY_TX) {
-      //     printf("Sent CAN message on A!\n");
-      //   } else
-      if (latest_notify_a == CAN2040_NOTIFY_ERROR) {
+      if (latest_notify_a == CAN2040_NOTIFY_RX) {
+        printf("Got CAN message on A!\n");
+      } else if (latest_notify_a == CAN2040_NOTIFY_TX) {
+        printf("Sent CAN message on A!\n");
+      } else if (latest_notify_a == CAN2040_NOTIFY_ERROR) {
         printf("CAN error on A!\n");
+      } else {
+        printf("INVALID NOTIFY A\n");
       }
-      //   else {
-      //     printf("INVALID NOTIFY A\n");
-      //   }
     }
 
     if (new_message_b) {
       new_message_b = false;
-      //   if (latest_notify_b == CAN2040_NOTIFY_RX) {
-      //     printf("Got CAN message on B!\n");
-      //   } else if (latest_notify_b == CAN2040_NOTIFY_TX) {
-      //     printf("Sent CAN message on B!\n");
-      //   } else
-      if (latest_notify_b == CAN2040_NOTIFY_ERROR) {
+      if (latest_notify_b == CAN2040_NOTIFY_RX) {
+        printf("Got CAN message on B!\n");
+        printf("Time: %" PRIu64 "\n", time_us_64() / 1000);
+        for (int i = 0; i < latest_msg_b.dlc; i++) {
+          printf("%d ", static_cast<int>(latest_msg_b.data[i]));
+        }
+        printf("\n");
+      } else if (latest_notify_b == CAN2040_NOTIFY_TX) {
+        printf("Sent CAN message on B!\n");
+      } else if (latest_notify_b == CAN2040_NOTIFY_ERROR) {
         printf("CAN error on B!\n");
+      } else {
+        printf("INVALID NOTIFY B\n");
       }
-      //    else {
-      //     printf("INVALID NOTIFY B\n");
-      //   }
     }
     sleep_us(kSleepUS);
   }
