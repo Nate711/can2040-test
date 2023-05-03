@@ -3,21 +3,26 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "hardware/irq.h"
-#include "pico/binary_info.h"
-#include "pico/stdlib.h"
-extern "C" {
-#include "can2040.h"
-}
 #include <iostream>
 
 #include "RP2040.h"
+#include "can2040.h"
+#include "hardware/irq.h"
+#include "pico/binary_info.h"
+#include "pico/stdlib.h"
+#include "pico/time.h"
 
 static struct can2040 cbus;
 
+static struct can2040_msg latest_msg = {};
+static uint32_t latest_notify = 0;
+static bool new_message = false;
+
 static void can2040_cb(struct can2040 *cd, uint32_t notify,
                        struct can2040_msg *msg) {
-  // Add message processing code here...
+  new_message = true;
+  latest_notify = notify;
+  latest_msg = *msg;
 }
 
 static void PIOx_IRQHandler(void) { can2040_pio_irq_handler(&cbus); }
@@ -25,7 +30,7 @@ static void PIOx_IRQHandler(void) { can2040_pio_irq_handler(&cbus); }
 void canbus_setup(void) {
   uint32_t pio_num = 0;
   uint32_t sys_clock = 125000000, bitrate = 125000;
-  uint32_t gpio_rx = 14, gpio_tx = 15;
+  uint32_t gpio_rx = 0, gpio_tx = 1;
 
   // Setup canbus
   can2040_setup(&cbus, pio_num);
@@ -49,15 +54,50 @@ int main(void) {
 
   canbus_setup();
 
+  int count = 0;
+
+  constexpr uint64_t kToggleLEDTime = 500 * 1000;
+  constexpr uint64_t kSendMessageTime = 4 * 1000;
+  constexpr uint32_t kSleepUS = 1;
+  uint64_t last_led_toggle = time_us_64();
+  uint64_t last_msg_sent = time_us_64();
   while (1) {
-    // printf("bla\n");
-    std::cout << "blah\n";
-    gpio_put(LED_PIN, ledState);
-    if (ledState == 0) {
-      ledState = 1;
-    } else {
-      ledState = 0;
+    if (time_us_64() - last_led_toggle > kToggleLEDTime) {
+      last_led_toggle = time_us_64();
+      std::cout << "count: " << count << "\n";
+      count++;
+
+      gpio_put(LED_PIN, ledState);
+      if (ledState == 0) {
+        ledState = 1;
+      } else {
+        ledState = 0;
+      }
     }
-    sleep_ms(1000);
+
+    if (time_us_64() - last_msg_sent > kSendMessageTime) {
+      last_msg_sent = time_us_64();
+      struct can2040_msg msg = {};
+      msg.id = 100;
+      msg.dlc = 8;
+      int data[8] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
+      for (int i = 0; i < 8; i++) {
+        msg.data[i] = data[i];
+      }
+
+      can2040_transmit(&cbus, &msg);
+    }
+
+    if (new_message) {
+      new_message = false;
+      if (latest_notify == CAN2040_NOTIFY_RX) {
+        printf("got can message!\n");
+      } else if (latest_notify == CAN2040_NOTIFY_TX) {
+        printf("sent can message!\n");
+      } else if (latest_notify == CAN2040_NOTIFY_ERROR) {
+        printf("can error!\n");
+      }
+    }
+    sleep_us(kSleepUS);
   }
 }
