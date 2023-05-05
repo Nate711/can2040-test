@@ -9,7 +9,9 @@
 #include <iostream>
 
 #include "RP2040.h"
+extern "C" {
 #include "can2040.h"
+}
 #include "hardware/irq.h"
 #include "pico/binary_info.h"
 #include "pico/stdlib.h"
