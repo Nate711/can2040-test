@@ -7,7 +7,7 @@
 
 #include "RP2040.h"
 extern "C" {
-#include "can2040.h"
+#include "../extern/can2040/src/can2040.h"
 }
 #include "hardware/irq.h"
 #include "pico/binary_info.h"

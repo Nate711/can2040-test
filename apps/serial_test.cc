@@ -15,12 +15,19 @@ constexpr int kToggleLEDTime = 500'000;  // us
 constexpr int kPrintTime = 1000;         // us
 static char message[50] = "012345670123456701234567012345670123456701234567\n";
 
+constexpr int UART_TX_PIN = 16;
+constexpr int UART_RX_PIN = 17;
+
 int main(void) {
   const uint LED_PIN = PICO_DEFAULT_LED_PIN;
   gpio_init(LED_PIN);
   gpio_set_dir(LED_PIN, GPIO_OUT);
   int32_t ledState = 0;
   stdio_init_all();
+
+  uart_init(uart0, 115200);
+  gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
+  gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
 
   int count = 0;
 

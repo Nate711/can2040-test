@@ -10,7 +10,7 @@
 
 #include "RP2040.h"
 extern "C" {
-#include "can2040.h"
+#include "../extern/can2040/src/can2040.h"
 }
 #include "hardware/irq.h"
 #include "pico/binary_info.h"
@@ -27,7 +27,7 @@ constexpr uint32_t kPIONumA = 0;
 constexpr uint32_t kPIONumB = 1;
 
 constexpr uint64_t kToggleLEDTime = 500 * 1000;
-constexpr uint64_t kSendMessageTime = 100 * 1000;
+constexpr uint64_t kSendMessageTime = 1 * 1000;
 constexpr uint32_t kSleepUS = 1;
 
 static struct can2040 cbus_a;
