@@ -36,7 +36,7 @@ pico_enable_stdio_uart(mg4005_test 0)
 
 
 add_executable(serial_test serial_test.cc)
-target_link_libraries(serial_test pico_stdlib can2040)
+target_link_libraries(serial_test pico_stdlib can2040 pupperv3)
 
 pico_add_extra_outputs(serial_test)
 pico_enable_stdio_usb(serial_test 0)
