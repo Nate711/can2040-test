@@ -5,7 +5,7 @@
 #include <inttypes.h>
 
 extern "C" {
-#include "../../extern/can2040/src/can2040.h"
+#include "can2040/src/can2040.h"
 }
 
 #include <array>

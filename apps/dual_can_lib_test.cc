@@ -1,10 +1,10 @@
-#include "../include/pupperv3/dual_can_lib.h"
+#include "pupperv3/dual_can_lib.h"
 
-#include "../include/pupperv3/utils.h"
 #include "hardware/irq.h"
 #include "pico/binary_info.h"
 #include "pico/stdlib.h"
 #include "pico/time.h"
+#include "pupperv3/utils.h"
 
 constexpr uint32_t kSysClock = 125'000'000;
 constexpr uint32_t kBitRate = 1'000'000;
