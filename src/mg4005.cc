@@ -22,10 +22,13 @@ uint32_t Interface::motor_id_to_can_id(uint32_t motor_id) {
 /// @param payload
 void Interface::send(const MotorID &motor_id, const Command &payload) {
   dualcan::Msg msg;
+  std::cout << "msg: ";
   for (int i = 0; i < payload.size(); i++) {
     msg.data[i] = payload[i];
+    std::cout << static_cast<int>(msg.data[i]) << " ";
   }
   msg.id = motor_id_to_can_id(motor_id.id);
+  std::cout << "id: " << msg.id << "\n";
   msg.dlc = 8;
   if (motor_id.bus == CANChannel::CAN_A) {
     dualcan::transmit_a(&msg);

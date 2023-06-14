@@ -38,12 +38,15 @@ static Msg latest_msg_a_ = {};
 static volatile uint32_t latest_notify_a_ = 0;
 static volatile bool new_message_a_ = false;
 
+static volatile bool TURN_ME_ON = false;
+
 static Msg latest_msg_b_ = {};
 static volatile uint32_t latest_notify_b_ = 0;
 static volatile bool new_message_b_ = false;
 
 static void can2040_cb_a(struct can2040 *cd, uint32_t notify, Msg *msg) {
   new_message_a_ = true;
+  TURN_ME_ON = true;
   latest_notify_a_ = notify;
   latest_msg_a_ = *msg;
 }

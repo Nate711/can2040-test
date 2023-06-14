@@ -1,12 +1,15 @@
 #include "pupperv3/mg4005.h"
 
+#include <cmath>
+
 #include "pupperv3/utils.h"
+
 constexpr uint32_t kGPIO_RX_A = 0, kGPIO_TX_A = 1;
 constexpr uint32_t kGPIO_RX_B = 14, kGPIO_TX_B = 15;
 const uint kLEDPin = PICO_DEFAULT_LED_PIN;
 
 constexpr float kLEDToggleFreq = 10.0;
-constexpr float kSendFreq = 500.0;
+constexpr float kSendFreq = 100.0;
 
 int main() {
   gpio_init(kLEDPin);
@@ -50,15 +53,27 @@ int main() {
 
     // Send CAN commands
     send_command.tick([&]() {
-      std::cout << "Sending velocity command\n";
-      interface.command_velocity(motor_1, 0.5);
-      interface.command_velocity(motor_2, -0.5);
-      interface.command_velocity(motor_3, 1.0);
+      float phase = static_cast<float>(time_us_64()) / 1000000.0;
+      float value = sin(phase);
+      std::cout << "Sending velocity command. Phase: " << phase << " " << value
+                << "\n";
+      interface.command_velocity(motor_1, 2.0 * value);
+      interface.command_velocity(motor_2, -1.0 * value);
+      interface.command_velocity(motor_3, 2.0 * value);
+
+      auto latest_a = dualcan::latest_msg_a();
+      std::cout << "latest msg: ";
+      for (int i = 0; i < 8; i++) {
+        std::cout << static_cast<int>(latest_a.data[i]) << " ";
+      }
+      std::cout << "\n";
+      std::cout << "turn me on: " << dualcan::TURN_ME_ON << "\n";
     });
 
     // Check for new messages
     // Doesn't work?? The callback is running succesfully though
     if (dualcan::new_message_a()) {
+      printf("got new message on a");
       dualcan::reset_new_message_a();
       auto msg = dualcan::latest_msg_a();
       auto latest_notify_a = dualcan::notification_a();
