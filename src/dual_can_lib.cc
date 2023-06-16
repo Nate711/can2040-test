@@ -1,10 +1,13 @@
 #include "pupperv3/dual_can_lib.h"
 
+#include <array>
 namespace dualcan {
 
 static Msg latest_msg_a_ = {};
 static volatile uint32_t latest_notify_a_ = 0;
 static volatile bool new_message_a_ = false;
+
+static RingBuffer<Msg, 1024> a_ring_buffer;
 
 static Msg latest_msg_b_ = {};
 static volatile uint32_t latest_notify_b_ = 0;
@@ -17,6 +20,9 @@ void can2040_cb_a(struct can2040* cd, uint32_t notify, Msg* msg) {
   new_message_a_ = true;
   latest_notify_a_ = notify;
   latest_msg_a_ = *msg;
+  if (notify == kNotifyRx) {
+    a_ring_buffer.push(*msg);
+  }
 }
 
 void can2040_cb_b(struct can2040* cd, uint32_t notify, Msg* msg) {
@@ -72,5 +78,9 @@ uint32_t notification_b() { return latest_notify_b_; }
 Msg latest_msg_a() { return latest_msg_a_; }
 
 Msg latest_msg_b() { return latest_msg_b_; }
+
+bool new_message_in_buffer_a() { return !a_ring_buffer.isEmpty(); }
+
+Msg pop_buffer_a() { return a_ring_buffer.pop(); }
 
 }  // namespace dualcan

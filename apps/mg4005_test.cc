@@ -1,5 +1,6 @@
 #include "pupperv3/mg4005.h"
 
+#include <array>
 #include <cmath>
 
 #include "pupperv3/utils.h"
@@ -9,7 +10,9 @@ constexpr uint32_t kGPIO_RX_B = 14, kGPIO_TX_B = 15;
 const uint kLEDPin = PICO_DEFAULT_LED_PIN;
 
 constexpr float kLEDToggleFreq = 10.0;
-constexpr float kSendFreq = 100.0;
+constexpr float kSendFreq = 500.0;
+
+constexpr int kNumMotorsUsed = 3;
 
 int main() {
   gpio_init(kLEDPin);
@@ -35,9 +38,23 @@ int main() {
   mg4005::MotorID motor_3;
   motor_3.bus = mg4005::CANChannel::CAN_A;
   motor_3.id = 3;
+  mg4005::MotorID motor_4;
+  motor_4.bus = mg4005::CANChannel::CAN_A;
+  motor_4.id = 4;
+  mg4005::MotorID motor_5;
+  motor_5.bus = mg4005::CANChannel::CAN_A;
+  motor_5.id = 5;
+  mg4005::MotorID motor_6;
+  motor_6.bus = mg4005::CANChannel::CAN_A;
+  motor_6.id = 6;
   interface.initialize_motor(motor_1);
   interface.initialize_motor(motor_2);
   interface.initialize_motor(motor_3);
+  interface.initialize_motor(motor_4);
+  interface.initialize_motor(motor_5);
+  interface.initialize_motor(motor_6);
+
+  std::array<int, 6> counts = {0, 0, 0, 0, 0, 0};
 
   utils::PeriodicCaller led_toggler(kLEDToggleFreq);
   int led_toggles = 0;
@@ -45,7 +62,7 @@ int main() {
   while (true) {
     // Toggle LED
     led_toggler.tick([&]() {
-      std::cout << "Time(ms): " << led_toggles * 100 << "\n";
+      //   std::cout << "Time(ms): " << led_toggles * 100 << "\n";
       led_toggles++;
       gpio_put(kLEDPin, led_state);
       led_state = !led_state;
@@ -53,32 +70,62 @@ int main() {
 
     // Send CAN commands
     send_command.tick([&]() {
-      float phase = static_cast<float>(time_us_64()) / 1000000.0;
+      float phase = 4 * static_cast<float>(time_us_64()) / 1000000.0;
       float value = sin(phase);
-      std::cout << "Sending velocity command. Phase: " << phase << " " << value
-                << "\n";
       interface.command_velocity(motor_1, 2.0 * value);
+      sleep_us(200);
       interface.command_velocity(motor_2, -1.0 * value);
+      sleep_us(200);
       interface.command_velocity(motor_3, 2.0 * value);
+      sleep_us(200);
+      //   interface.command_velocity(motor_4, 2.0 * value);
+      //   sleep_us(200);
+      //   interface.command_velocity(motor_5, -1.0 * value);
+      //   sleep_us(200);
+      //   interface.command_velocity(motor_6, 2.0 * value);
+      //   sleep_us(200);
+      int count_max = 0;
+      for (int i = 0; i < kNumMotorsUsed; i++) {
+        count_max = std::max(count_max, counts[i]);
+      }
+      printf("Counts: ");
+      for (int i = 0; i < kNumMotorsUsed; i++) {
+        printf("%d ", counts[i] - count_max);
+      }
+      printf("\n");
     });
 
     // Check for new messages
-    if (dualcan::new_message_a()) {
-      dualcan::reset_new_message_a();
-      auto msg = dualcan::latest_msg_a();
-      auto latest_notify_a = dualcan::notification_a();
-      if (latest_notify_a == dualcan::kNotifyRx) {
-        printf("Message from id=%d contents=[%d %d %d %d %d %d %d %d]\n",
-               msg.id, msg.data[0], msg.data[1], msg.data[2], msg.data[3],
-               msg.data[4], msg.data[5], msg.data[6], msg.data[7]);
-      } else if (latest_notify_a == dualcan::kNotifyTx) {
-        printf("Sent CAN message on A!\n");
-      } else if (latest_notify_a == dualcan::kNotifyError) {
-        printf("CAN error on A!\n");
-      } else {
-        printf("INVALID NOTIFY A\n");
-      }
+    while (dualcan::new_message_in_buffer_a()) {
+      __disable_irq();
+      auto msg = dualcan::pop_buffer_a();
+      __enable_irq();
+      int idx = msg.id - 0x140 - 1;
+      counts.at(idx)++;
+      //   printf("Message from id=%d contents=[%d %d %d %d %d %d %d %d]\n",
+      //   msg.id,
+      //          msg.data[0], msg.data[1], msg.data[2], msg.data[3],
+      //          msg.data[4], msg.data[5], msg.data[6], msg.data[7]);
     }
+
+    // if (dualcan::new_message_a()) {
+    //   dualcan::reset_new_message_a();
+    //   auto msg = dualcan::latest_msg_a();
+    //   auto latest_notify_a = dualcan::notification_a();
+    //   if (latest_notify_a == dualcan::kNotifyRx) {
+    //     int idx = msg.id - 0x140 - 1;
+    //     counts.at(idx)++;
+    //     printf("Message from id=%d contents=[%d %d %d %d %d %d %d %d]\n",
+    //            msg.id, msg.data[0], msg.data[1], msg.data[2], msg.data[3],
+    //            msg.data[4], msg.data[5], msg.data[6], msg.data[7]);
+    //   } else if (latest_notify_a == dualcan::kNotifyTx) {
+    //     // printf("Sent CAN message on A!\n");
+    //   } else if (latest_notify_a == dualcan::kNotifyError) {
+    //     printf("CAN error on A!\n");
+    //   } else {
+    //     printf("INVALID NOTIFY A\n");
+    //   }
+    // }
     sleep_us(1);  // 1000khz
   }
   interface.stop_motor(motor_1);

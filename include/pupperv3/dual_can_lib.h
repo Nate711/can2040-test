@@ -6,6 +6,7 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
+#include <array>
 #include <iostream>
 
 #include "RP2040.h"
@@ -48,5 +49,49 @@ uint32_t notification_a();
 uint32_t notification_b();
 Msg latest_msg_a();
 Msg latest_msg_b();
+
+bool new_message_in_buffer_a();
+Msg pop_buffer_a();
+
+template <typename T, std::size_t Capacity>
+class RingBuffer {
+ public:
+  RingBuffer() : head_(0), tail_(0), size_(0) {}
+
+  void push(const T& value) {
+    if (isFull()) {
+      std::cerr << "Buffer is full. Unable to push element.\n";
+      return;
+    }
+
+    buffer_[head_] = value;
+    head_ = (head_ + 1) % Capacity;
+    size_++;
+  }
+
+  T pop() {
+    if (isEmpty()) {
+      std::cerr << "Buffer is empty. Unable to pop element.\n";
+      return T();
+    }
+
+    T value = buffer_[tail_];
+    tail_ = (tail_ + 1) % Capacity;
+    size_--;
+    return value;
+  }
+
+  bool isEmpty() const { return size_ == 0; }
+
+  bool isFull() const { return size_ == Capacity; }
+
+  std::size_t size() const { return size_; }
+
+ private:
+  std::array<T, Capacity> buffer_;
+  std::size_t head_;
+  std::size_t tail_;
+  std::size_t size_;
+};
 
 }  // namespace dualcan
