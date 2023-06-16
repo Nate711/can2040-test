@@ -54,9 +54,9 @@ int main(void) {
 
     transmit_message.tick([&]() {
       dualcan::Msg msg = {};
-      msg.id = 100;
+      msg.id = 142;
       msg.dlc = 8;
-      int data[8] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
+      int data[8] = {0xA2, 0x00, 0x00, 0x00, 0xBD, 0x11, 0x00, 0x00};
       for (int i = 0; i < 8; i++) {
         msg.data[i] = data[i];
       }

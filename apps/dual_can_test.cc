@@ -111,9 +111,9 @@ int main(void) {
       last_msg_sent = time_us_64();
       //   std::cout << "Last msg sent: " << last_msg_sent << "\n";
       struct can2040_msg msg = {};
-      msg.id = 100;
+      msg.id = 0x142;
       msg.dlc = 8;
-      int data[8] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
+      int data[8] = {0xA2, 0x00, 0x00, 0x00, 0xBD, 0x11, 0x00, 0x00};
       for (int i = 0; i < 8; i++) {
         msg.data[i] = data[i];
       }

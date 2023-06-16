@@ -67,7 +67,7 @@ int main() {
         std::cout << static_cast<int>(latest_a.data[i]) << " ";
       }
       std::cout << "\n";
-      std::cout << "turn me on: " << dualcan::TURN_ME_ON << "\n";
+      //   std::cout << "turn me on: " << dualcan::TURN_ME_ON << "\n";
     });
 
     // Check for new messages
