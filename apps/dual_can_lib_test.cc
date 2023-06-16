@@ -54,7 +54,7 @@ int main(void) {
 
     transmit_message.tick([&]() {
       dualcan::Msg msg = {};
-      msg.id = 142;
+      msg.id = 0x142;
       msg.dlc = 8;
       int data[8] = {0xA2, 0x00, 0x00, 0x00, 0xBD, 0x11, 0x00, 0x00};
       for (int i = 0; i < 8; i++) {
@@ -77,24 +77,24 @@ int main(void) {
       }
     }
 
-    if (dualcan::new_message_b()) {
-      dualcan::reset_new_message_b();
-      auto latest_notify_b = dualcan::notification_b();
-      if (latest_notify_b == dualcan::kNotifyRx) {
-        printf("Got CAN message on B!\n");
-        printf("Time: %" PRIu64 "\n", time_us_64() / 1000);
-        for (int i = 0; i < dualcan::latest_msg_b().dlc; i++) {
-          printf("%d ", static_cast<int>(dualcan::latest_msg_b().data[i]));
-        }
-        printf("\n");
-      } else if (latest_notify_b == dualcan::kNotifyTx) {
-        printf("Sent CAN message on B!\n");
-      } else if (latest_notify_b == dualcan::kNotifyError) {
-        printf("CAN error on B!\n");
-      } else {
-        printf("INVALID NOTIFY B\n");
-      }
-    }
+    // if (dualcan::new_message_b()) {
+    //   dualcan::reset_new_message_b();
+    //   auto latest_notify_b = dualcan::notification_b();
+    //   if (latest_notify_b == dualcan::kNotifyRx) {
+    //     printf("Got CAN message on B!\n");
+    //     printf("Time: %" PRIu64 "\n", time_us_64() / 1000);
+    //     for (int i = 0; i < dualcan::latest_msg_b().dlc; i++) {
+    //       printf("%d ", static_cast<int>(dualcan::latest_msg_b().data[i]));
+    //     }
+    //     printf("\n");
+    //   } else if (latest_notify_b == dualcan::kNotifyTx) {
+    //     printf("Sent CAN message on B!\n");
+    //   } else if (latest_notify_b == dualcan::kNotifyError) {
+    //     printf("CAN error on B!\n");
+    //   } else {
+    //     printf("INVALID NOTIFY B\n");
+    //   }
+    // }
     sleep_us(kSleepUS);
   }
 }

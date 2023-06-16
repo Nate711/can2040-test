@@ -60,26 +60,17 @@ int main() {
       interface.command_velocity(motor_1, 2.0 * value);
       interface.command_velocity(motor_2, -1.0 * value);
       interface.command_velocity(motor_3, 2.0 * value);
-
-      auto latest_a = dualcan::latest_msg_a();
-      std::cout << "latest msg: ";
-      for (int i = 0; i < 8; i++) {
-        std::cout << static_cast<int>(latest_a.data[i]) << " ";
-      }
-      std::cout << "\n";
-      //   std::cout << "turn me on: " << dualcan::TURN_ME_ON << "\n";
     });
 
     // Check for new messages
-    // Doesn't work?? The callback is running succesfully though
     if (dualcan::new_message_a()) {
-      printf("got new message on a");
       dualcan::reset_new_message_a();
       auto msg = dualcan::latest_msg_a();
       auto latest_notify_a = dualcan::notification_a();
       if (latest_notify_a == dualcan::kNotifyRx) {
-        printf("Got CAN message on A:");
-        std::cout << msg.data << "\n";
+        printf("Message from id=%d contents=[%d %d %d %d %d %d %d %d]\n",
+               msg.id, msg.data[0], msg.data[1], msg.data[2], msg.data[3],
+               msg.data[4], msg.data[5], msg.data[6], msg.data[7]);
       } else if (latest_notify_a == dualcan::kNotifyTx) {
         printf("Sent CAN message on A!\n");
       } else if (latest_notify_a == dualcan::kNotifyError) {

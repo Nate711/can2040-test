@@ -13,23 +13,21 @@ static volatile bool new_message_b_ = false;
 static struct can2040 cbus_a;
 static struct can2040 cbus_b;
 
-static volatile bool TURN_ME_ON = false;
-
-static void can2040_cb_a(struct can2040* cd, uint32_t notify, Msg* msg) {
+void can2040_cb_a(struct can2040* cd, uint32_t notify, Msg* msg) {
   new_message_a_ = true;
   latest_notify_a_ = notify;
   latest_msg_a_ = *msg;
 }
 
-static void can2040_cb_b(struct can2040* cd, uint32_t notify, Msg* msg) {
+void can2040_cb_b(struct can2040* cd, uint32_t notify, Msg* msg) {
   new_message_b_ = true;
   latest_notify_b_ = notify;
   latest_msg_b_ = *msg;
 }
 
-static void PIOx_IRQHandler_A(void) { can2040_pio_irq_handler(&cbus_a); }
+void PIOx_IRQHandler_A(void) { can2040_pio_irq_handler(&cbus_a); }
 
-static void PIOx_IRQHandler_B(void) { can2040_pio_irq_handler(&cbus_b); }
+void PIOx_IRQHandler_B(void) { can2040_pio_irq_handler(&cbus_b); }
 
 void setup(SetupParams params) {
   // Setup canbus
