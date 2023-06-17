@@ -96,8 +96,6 @@ int main(void) {
   while (1) {
     if (time_us_64() - last_led_toggle > kToggleLEDTime) {
       last_led_toggle = time_us_64();
-      std::cout << "Count: " << count << "\n";
-      count++;
 
       gpio_put(LED_PIN, ledState);
       if (ledState == 0) {
@@ -119,14 +117,20 @@ int main(void) {
       }
 
       can2040_transmit(&cbus_a, &msg);
+      sleep_us(200);
+      can2040_transmit(&cbus_a, &msg);
+      sleep_us(200);
+      can2040_transmit(&cbus_a, &msg);
+      sleep_us(200);
+      count++;
     }
 
     if (new_message_a) {
       new_message_a = false;
       if (latest_notify_a == CAN2040_NOTIFY_RX) {
-        printf("Got CAN message on A!\n");
+        // printf("Got CAN message on A!\n");
       } else if (latest_notify_a == CAN2040_NOTIFY_TX) {
-        printf("Sent CAN message on A!\n");
+        // printf("Sent CAN message on A!\n");
       } else if (latest_notify_a == CAN2040_NOTIFY_ERROR) {
         printf("CAN error on A!\n");
       } else {
@@ -137,14 +141,14 @@ int main(void) {
     if (new_message_b) {
       new_message_b = false;
       if (latest_notify_b == CAN2040_NOTIFY_RX) {
-        printf("Got CAN message on B!\n");
-        printf("Time: %" PRIu64 "\n", time_us_64() / 1000);
-        for (int i = 0; i < latest_msg_b.dlc; i++) {
-          printf("%d ", static_cast<int>(latest_msg_b.data[i]));
-        }
-        printf("\n");
+        // printf("Got CAN message on B!\n");
+        // printf("Time: %" PRIu64 "\n", time_us_64() / 1000);
+        // for (int i = 0; i < latest_msg_b.dlc; i++) {
+        //   printf("%d ", static_cast<int>(latest_msg_b.data[i]));
+        // }
+        // printf("\n");
       } else if (latest_notify_b == CAN2040_NOTIFY_TX) {
-        printf("Sent CAN message on B!\n");
+        // printf("Sent CAN message on B!\n");
       } else if (latest_notify_b == CAN2040_NOTIFY_ERROR) {
         printf("CAN error on B!\n");
       } else {
