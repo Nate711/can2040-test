@@ -1,3 +1,6 @@
+# Summary
+* can2040 was not stable enough for use on the robot. I got a lot of error messages / resent messages when communicating with computer as well as with the real motor. Switching to SPIne.
+
 # Setup
 * Install toolchain
 * Download Pico SDK and set PICO_SDK_PATH environment variable (or uncomment the line in the CMakeLists.txt so that it's automatically downloaded)
